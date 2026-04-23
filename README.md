@@ -1,11 +1,8 @@
-# README
+# DeadEndpoint
 
-## About
+A standalone, local only mock endpoint for receiving and inspecting HTTP requests.
 
-This is the official Wails Vue-TS template.
-
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+Your HTTP requests go nowhere, hence it is a dead end.
 
 ## Live Development
 
