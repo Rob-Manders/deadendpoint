@@ -14,10 +14,11 @@ import (
 
 // App struct
 type App struct {
-	ctx     context.Context
-	server  *http.Server
-	running bool
-	mutex   sync.Mutex
+	ctx          context.Context
+	server       *http.Server
+	running      bool
+	responseCode int
+	mutex        sync.Mutex
 }
 
 type CapturedRequest struct {
@@ -30,7 +31,9 @@ type CapturedRequest struct {
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	return &App{}
+	return &App{
+		responseCode: http.StatusOK,
+	}
 }
 
 // startup is called when the app starts. The context is saved
@@ -39,7 +42,7 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-func (a *App) StartServer(port int, responseCode int) {
+func (a *App) StartServer(port int) {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
 
@@ -61,7 +64,7 @@ func (a *App) StartServer(port int, responseCode int) {
 
 		runtime.EventsEmit(a.ctx, "request_received", request)
 
-		w.WriteHeader(responseCode)
+		w.WriteHeader(a.responseCode)
 	})
 
 	a.server = &http.Server{
@@ -92,4 +95,8 @@ func (a *App) StopServer() {
 	a.running = false
 
 	runtime.EventsEmit(a.ctx, "server_running", false)
+}
+
+func (a *App) SetResponseCode(code int) {
+	a.responseCode = code
 }
