@@ -1,23 +1,50 @@
 <script lang="ts" setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { ref, onMounted } from "vue"
+import { StartServer, StopServer } from "../wailsjs/go/main/App"
+import { EventsOn } from "../wailsjs/runtime"
+
+const requests = ref<any[]>([])
+const isRunning = ref(false)
+
+function startServer() {
+  StartServer(8080, 200)
+}
+
+function stopServer() {
+  StopServer()
+}
+
+onMounted(() => {
+  EventsOn("request_received", request => {
+    requests.value.unshift(request)
+  })
+
+  EventsOn("server_running", running => {
+    isRunning.value = running
+  })
+})
 
 </script>
 
 <template>
-  <img id="logo" alt="Wails logo" src="./assets/images/logo-universal.png"/>
-  <HelloWorld/>
+  <div class="container">
+    <h1>DeadEndpoint</h1>
+
+    <div class="controls">
+      <button @click="startServer" :disabled="isRunning">Start</button>
+      <button @click="stopServer" :disabled="!isRunning">Stop</button>
+
+      <span>Status:</span> <strong>{{ isRunning ? "Running" : "Stopped" }}</strong>
+    </div>
+  </div>
+
+  <h2>Requests</h2>
+
+  <div class="request" v-for="(r, i) in requests" :key="i">
+    <pre>{{ JSON.stringify(r, null, 2)}}</pre>
+  </div>
 </template>
 
 <style>
-#logo {
-  display: block;
-  width: 50%;
-  height: 50%;
-  margin: auto;
-  padding: 10% 0 0;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  background-origin: content-box;
-}
+
 </style>
